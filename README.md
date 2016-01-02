@@ -10,6 +10,7 @@ Configuration:
     Next, you have to edit the file "config.py" to set the other Genetic configurations.
 
 IMPORTANT:
+
     1. This work is under development.
 
        It is working parallelized and distributed, but I will change the code to turn the process easy.
