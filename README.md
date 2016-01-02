@@ -1,10 +1,14 @@
+## Genetic Distributed Algorithm to Fast Artificial Neural Network
+
+###About
+
 This project is a Genetic Algorithm made in Python that works with library FANN (Fast Artificial Neural Network).
 
 The Genetic Algorithm is able to tune the Artificial Neural Network (ANN) parameters.
 
 The Genetic Algoritm can be used to another applications to.
 
-Configuration:
+###Configuration
 
     First, you have to edit the file "config_cromossomo.py" and fill the matrix tipoGenes with the types of genes that can be used.
 
@@ -12,7 +16,7 @@ Configuration:
 
     Next, you have to edit the file "config.py" to set the other Genetic configurations.
 
-IMPORTANT:
+###IMPORTANT
 
     1. This work is under development.
 
