@@ -1,0 +1,10 @@
+Para gerar as entradas e o avaliador, faça:
+    make
+Depois, só executar o genético com:
+    ./RNAGenetico.py
+
+Após terminar, separe os cromossomos da última população com:
+    ./utils/01-copiar_redes.sh
+
+Depois, gere os gráficos com:
+    ./utils/02-gen_plots.sh

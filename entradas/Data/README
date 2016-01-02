@@ -1,0 +1,2 @@
+Criação de todos_dados.txt:
+    cat results_pid/results_pid-velocity-20140320-* > todos_dados.txt

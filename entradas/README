@@ -1,0 +1,11 @@
+Para gerar os dados, entre na pasta Data e digite: make
+Use como todos os dados o arquivo:
+    'todos_dados.fann'
+
+Depois, execute o arquivo '../separarEntradas.py' para gerar
+o conjunto de testes, treino e validação.
+
+Configure a porcentagem de dados em ../config.py
+
+------------------------
+Se der um make aqui, ele já fará tudo
