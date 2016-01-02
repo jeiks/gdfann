@@ -11,8 +11,13 @@ Configuration:
 
 IMPORTANT:
     1. This work is under development.
+
        It is working parallelized and distributed, but I will change the code to turn the process easy.
+
     2. It is writed Portuguese.
+
     3. We will translate it soon.
+
     4. The first version was made in my master degree:
+
        <http://www.dpi.ufv.br/arquivos/ppgcc/dissertacoes/2011-ms-Jacson_Rodrigues_Correia_da_Silva.pdf>
