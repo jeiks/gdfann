@@ -5,8 +5,11 @@ The Genetic Algorithm is able to tune the Artificial Neural Network (ANN) parame
 The Genetic Algoritm can be used to another applications to.
 
 Configuration:
+
     First, you have to edit the file "config_cromossomo.py" and fill the matrix tipoGenes with the types of genes that can be used.
+
     Next, in same file, you have to fill the function 'avaliacaoRNA'. This function will evaluate each chromossome. This result must be: "Resultado: FITNESS_NUMBER"
+
     Next, you have to edit the file "config.py" to set the other Genetic configurations.
 
 IMPORTANT:
