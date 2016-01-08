@@ -380,7 +380,10 @@ class Populacao:
         if len(self.__individuos) < 1:
             warnings.warn("Primeiro gere uma população com " \
                           "mais de 1 elemento", stacklevel=2)
+            from sys import exit
+            exit(1)
         else:
+            from random import randint
             self.__velhaPopulacao = list(self.getIndividuos())
             self.__velPopAvaliada = self.__indAvaliados
             self.__historicoIndividuos += self.__velhaPopulacao
@@ -411,6 +414,13 @@ class Populacao:
 
                     tentativas -= 1
             
+            if len(self.__individuos) <> len(novaPopulacao):
+                print 'CUIDADO: Não foi possível gerar filhos diferentes dos que já foram gerados no passado'
+                print '         Com isso, a população atual possui menos indivíduos'
+                print '         Para corrigir, serao adicionados individuos aleatorios da populacao antiga'
+                # nao permite que a populacao nova tenha menos individuos que a atual
+                while len(self.__individuos) <> len(novaPopulacao):
+                    novaPopulacao.append( self.__individuos[randint(0,len(self.__individuos)-1)] ) 
             self.__individuos = []
             for i in novaPopulacao: self.addIndividuo(i)
             self.__indAvaliados = False
