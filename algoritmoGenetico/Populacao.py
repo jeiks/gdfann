@@ -331,7 +331,7 @@ class Populacao:
             @return: True  -> indivíduo já existe na população
                      False -> indivíduo não existe a população
         '''
-        for i in self.__velhaPopulacao:
+        for i in self.__historicoIndividuos:
             if i.getCromossomo() == cromo.getCromossomo():
                 return True
         return False
@@ -416,7 +416,7 @@ class Populacao:
             
             if len(self.__individuos) <> len(novaPopulacao):
                 print 'CUIDADO: Não foi possível gerar filhos diferentes dos que já foram gerados no passado'
-                print '         Com isso, a população atual possui menos indivíduos'
+                print '         Com isso, a população atual possuiria menos indivíduos'
                 print '         Para corrigir, serao adicionados individuos aleatorios da populacao antiga'
                 # nao permite que a populacao nova tenha menos individuos que a atual
                 while len(self.__individuos) <> len(novaPopulacao):
