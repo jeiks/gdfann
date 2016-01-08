@@ -105,7 +105,7 @@ class AlgGenetico:
         '''
         retorno = []
         
-        self.__Populacao = Populacao( self.__tipoGenes, distribuido=self.__distribuido )
+        self.__Populacao = Populacao( self.__tipoGenes, distribuido=self.__distribuido, maiorValor=self.__considMaiorAvaliacao )
         self.__Populacao.gerarPopulacao( self.__qntIndividuos )
         self.__Populacao.avaliarPopulacao( self.__funcaoAvaliacao )
         if self.__criterioSatisfacao != 0.0:

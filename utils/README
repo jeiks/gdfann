@@ -1,1 +1,5 @@
-Execute os programas daqui do diretório principal do gdfann
+Para executar esses scripts:
+    1. Caminhe para o diretorio gdfann (um nivel superior a este diretorio);
+    2. Execute os comandos:
+       ./utils/01-copiar_redes.sh
+       ./utils/02-gen_plots.sh

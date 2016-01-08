@@ -3,6 +3,7 @@
 ARQ_RESULTADOS='Resultado_Alg-Genetico.txt'
 ARQ_TEMP='.tempResults'
 ARQ_VALIDACAO='entradas/validacao.train'
+TESTE_RNA='utils/teste_RNA'
 
 [ ! -f $ARQ_RESULTADOS ] && {
     echo "ERRO: Não foi possível abrir o arquivo $ARQ_RESULTADOS"
@@ -14,12 +15,13 @@ mkdir -p ../RNAs
 
 awk '{for (i=2;i<10;i++) {printf "%s_",$i}; printf $10".net "$NF"\n";}' $ARQ_RESULTADOS > $ARQ_TEMP
 
-[ ! -f teste_RNA ] && make teste_RNA
+[ ! -f $TESTE_RNA ] && make teste_RNA
 
-FANN_VERSION_2=$( (ldd teste_RNA | grep -q /usr/lib/x86_64-linux-gnu/libfann.so.2) && echo 0 || echo 1)
+FANN_VERSION_2=$( (ldd $TESTE_RNA | grep -q /usr/lib/x86_64-linux-gnu/libfann.so.2) && echo 0 || echo 1)
 
 NUM=1
 while read RNA MSE;do
+    MSE=$(awk '{printf "%.6f",$1}' <<< $MSE)
     ACHOU=0
     RNA_aux="${RNA%.net}*.net"
     for R in $(find .. -name "$RNA_aux");do
@@ -32,20 +34,13 @@ while read RNA MSE;do
             grep -v cascade_min_ $R > /tmp/.rna_temp
             mv -f /tmp/.rna_temp $R
         fi
-        M=$(./teste_RNA $R $ARQ_VALIDACAO | grep Mean\ Sq| awk '{print $NF}')
-        # fix exponential
-        case $MSE in *'e'*) MSE=$(awk '{printf "%f",$1}' <<< $MSE);; esac
+        M=$(./$TESTE_RNA $R $ARQ_VALIDACAO | grep Mean\ Sq| awk '{print "%.6f",$NF}')
         if [ "$M" = "$MSE" ];then
             cp -v $R ../RNAs/$(printf "%03d" $NUM)-${R##*/}
             ACHOU=1
             break
         fi
     done
-    [ $ACHOU -eq 0 ] && {
-        echo "Não foi possível achar a RNA: $RNA"
-        echo "Copiando $R no lugar, pois tem a mesma configuração."
-        cp -v $R ../RNAs/$(printf "%03d" $NUM)-${R##*/}
-    }
     let NUM++
 done < $ARQ_TEMP
 

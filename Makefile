@@ -12,13 +12,15 @@ Avaliador_Fann: buildHeader
 	@#usado na execucao do Algoritmo Genetico
 	$(CC) -o Avaliador_Fann Avaliador_Fann.c $(CFLAGS)
 
-teste_RNA:
-	@#usado apos executar o algoritmo genetico
-	$(CC) -o teste_RNA      teste_RNA.c      $(CFLAGS)
-
 clean:
-	rm -f teste_RNA Avaliador_Fann Avaliador_Fann.h .tempResults
+	rm -f Avaliador_Fann Avaliador_Fann.h .tempResults
 	find -name '*.pyc' -delete
+
+teste_RNA:
+	cd utils && make
+
+clean_teste_RNA:
+	cd utils && make clean
 
 buildPatterns:
 	cd entradas && make
@@ -26,5 +28,5 @@ buildPatterns:
 cleanPatterns:
 	cd entradas && make clean
 
-distclean: clean cleanPatterns
+distclean: clean cleanPatterns clean_teste_RNA
 	rm -rf Execucao_Alg_Gen.log Resultado_Alg-Genetico.txt Redes_Geradas results_plots results_tests

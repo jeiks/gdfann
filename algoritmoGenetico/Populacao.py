@@ -5,12 +5,12 @@
 
 from Cromossomo import Cromossomo
 import warnings
-from threading import Thread, Lock
+from threading import Thread
 from time import sleep
 import jsonrpclib
 from config import nodes
 
-escrita = Lock()
+printMsgWait = True
 
 class AvaliacaoCromossomo(Thread):
         def __init__(self, cromo, funcao):
@@ -38,7 +38,7 @@ class AvaliacaoPopulacao(Thread):
         a = []
         for i in self._populacao:
             a.append(i.getCromossomo())
-        with escrita: print 'Enviando', a, 'para', self._client
+        print 'Enviando', a, 'para', self._client
         self._answers = server.run(a)
         
     def obterAvaliacoes(self):
@@ -62,7 +62,7 @@ class Populacao:
     __threads_pool        = None
     __distribuido         = None
     
-    def __init__(self, matrizPossib, verboso=True, distribuido=False):
+    def __init__(self, matrizPossib, verboso=True, distribuido=False, maiorValor=True):
         ''' Cronstutor padrão
             @param matrizPossib: matriz com as possibilidades de genes
                        existentes
@@ -78,6 +78,7 @@ class Populacao:
         self.__paralelo            = True
         self.__threads_pool        = []
         self.__distribuido         = distribuido
+        self.__maiorValor          = maiorValor
     
     def addIndividuo(self, cromo):
         ''' Adiciona um indivíduo a população
@@ -105,6 +106,16 @@ class Populacao:
         '''
         return self.__individuos
     
+    def getAllFitness(self):
+        ''' Método para obter o fitness de todos os indivíduos
+            @return: fitness de todos individuos
+        '''
+        ret = []
+        for i in self.getIndividuos():
+            ret.append(i.getAvaliacao())
+
+        return list(ret)
+    
     def gerarPopulacao(self, qntIndividuos):
         ''' Método para gerar uma população aleatória
             @param qntIndividuos: quantidade de indivíduos da população
@@ -125,6 +136,8 @@ class Populacao:
             qntIndividuos-=1
         
         self.__indAvaliados = False
+        try: del(self.__roleta)
+        except: pass
 
     def dividirPopulacao(self, populacao=None, qntsPartes=1):
         if populacao is None: populacao = self.__individuos
@@ -161,7 +174,7 @@ class Populacao:
         #PARALELIZANDIOOO....
         if self.__verboso: print 'Avaliando a população em paralelo.'
         threads = []
-        grupos_threads = 10
+        grupos_threads = 7
         # sincronização
         threads_executando = [False]*len(pop)
         threads_terminadas = [False]*len(pop)
@@ -171,11 +184,9 @@ class Populacao:
                 threads.append( AvaliacaoCromossomo(c, funcao) )
             else:
                 threads.append( AvaliacaoCromossomo(c.getCromossomo(), funcao) )
-        
+                
+        global printMsgWait
         while threads_terminadas.count(False) > 0:
-            if self.__verboso: 
-                verb_qnt = threads_terminadas.count(False)
-                with escrita: print 'Esperando %d cromossomo%s terminar%s sua execução...' % (verb_qnt, ('s' if verb_qnt > 1 else ''), ('em' if verb_qnt > 1 else ''))
             count = 0
             while threads_executando.count(True) < grupos_threads and count < len(pop):
                 if not threads_terminadas[count] and not threads_executando[count]:
@@ -184,18 +195,23 @@ class Populacao:
                     threads_executando[count] = True
                 count = count+1
 
+            if self.__verboso and printMsgWait: 
+                verb_qnt = threads_terminadas.count(False)
+                print 'Esperando %d cromossomo%s terminar%s sua execução...' % (verb_qnt, ('s' if verb_qnt > 1 else ''), ('em' if verb_qnt > 1 else ''))
+                printMsgWait = False
+
             for i in range(0, len(pop)):
                 if threads_executando[i]:
                     if not threads[i].isAlive():
                         if self.__verboso:
-                            with escrita: print 'A avaliação do cromossomo %d acabou.' % i
+                            print 'A avaliação do cromossomo %d acabou.' % i
+                            printMsgWait = True
                         threads_terminadas[i] = True
                         threads_executando[i] = False
             sleep(2)
             
         for n in range(len(pop)):
-            if self.__verboso:
-                with escrita: print 'Cromossomo',n,'com avaliacao',threads[n].getResp()
+            if self.__verboso: print 'Cromossomo',n,'com avaliacao',threads[n].getResp()
             pop[n].setAvaliacao( threads[n].getResp() )
         
         if self.__distribuido:
@@ -235,6 +251,8 @@ class Populacao:
         
         if self.__velhaPopulacao == []:
             if self.__verboso: print 'Fazendo Cruzamento...'
+            try: del(self.__roleta)
+            except: pass
             self.fazerCruzamento()
             if self.__verboso: print 'Fazendo Mutação...'
             self.fazerMutacao()
@@ -317,6 +335,44 @@ class Populacao:
             if i.getCromossomo() == cromo.getCromossomo():
                 return True
         return False
+       
+    def roleta(self):
+        from random import random
+        
+        fitness = self.getAllFitness()
+        auxMax = max(fitness)
+        auxMin = min(fitness)
+        if not self.__maiorValor:
+            fitness = map(lambda x: (auxMax+auxMin/2) - x, fitness)
+
+        try:
+            roleta = self.__roleta
+        except AttributeError:
+            self.__roleta = []
+            soma = 0.0
+            for i in fitness:
+                self.__roleta.append(i+soma)
+                soma += i
+            roleta = self.__roleta
+        
+        c1, c2 = (0,0)
+        roleta = [0] + roleta
+        while c1 == c2:
+            #sorteio:
+            val1 = random()*(max(roleta))
+            val2 = random()*(max(roleta))
+            count = len(roleta)-1
+            while count >= 0 and (val1 <> -1 or val2 <> -1):
+                if val1 > roleta[count]:
+                    c1 = count
+                    val1 = -1
+                if val2 > roleta[count]:
+                    c2 = count
+                    val2 = -1
+        
+                count -= 1
+        
+        return c1, c2
     
     def fazerCruzamento(self):
         ''' Realiza o cruzamento entre os indivíduos da População
@@ -328,47 +384,36 @@ class Populacao:
             self.__velhaPopulacao = list(self.getIndividuos())
             self.__velPopAvaliada = self.__indAvaliados
             self.__historicoIndividuos += self.__velhaPopulacao
-            
-            from random import shuffle
-            # cria vetor com o mesmo número de indivíduos
-            aux = range( 0, self.getQntIndividuos() )
-            # embaralha o vetor
-            shuffle(aux)
-            # separa o vetor ao meio
-            id1 = aux[:self.getQntIndividuos()/2]
-            id2 = aux[self.getQntIndividuos()/2:]
-            
-            # faz o cruzamento entre os indivíduos
+
+            novaPopulacao = []
+            # criando uma população com a mesma quantidade de individuos
             for i in range(self.getQntIndividuos()/2):
+                #sorteia dois individuos usando a roleta:
+                ind1, ind2 = self.roleta()
+
+                #faz o cruzamento até encontrar um individuo que
+                # ainda nao pertence a populacao (loop máximo de 30 vezes)
                 tentativas    = 30
                 ret1_OK       = False
                 ret2_OK       = False
                 while (not ret1_OK or not ret2_OK) and tentativas > 0:
-                    ret1, ret2 = self.__cruzar( 
-                            self.getIndividuo( id1[i] ),
-                            self.getIndividuo( id2[i] ) )
-                    # para cada um dos retornos do Cruzamento
-                    for retC in [ ret1, ret2 ]:
-                        # se não for um indivíduo já existente
-                        if not self.verificarDuplo( retC ):
-                            # se ainda nao tiver adicionado na pos. id1
-                            if not ret1_OK:
-                                self.setIndividuo(id1[i], retC)
-                                ret1_OK = True
-                            # se ainda nao tiver adicionado na pos. id2
-                            elif not ret2_OK:
-                                self.setIndividuo(id2[i], retC)
-                                ret2_OK = True
-
-                    tentativas -= 1        
-                
-                if tentativas == 0:
+                    ret1, ret2 = self.__cruzar(self.__velhaPopulacao[ind1], self.__velhaPopulacao[ind2])
+                    
                     if not ret1_OK:
-                        self.setIndividuo(id1[i], ret1)
+                        if not self.verificarDuplo(ret1):
+                            novaPopulacao.append(ret1)
+                            ret1_OK = True
+                    
                     if not ret2_OK:
-                        self.setIndividuo(id2[i], ret2)
-                
-                self.__indAvaliados = False
+                        if not self.verificarDuplo(ret2):
+                            novaPopulacao.append(ret2)
+                            ret2_OK = True
+
+                    tentativas -= 1
+            
+            self.__individuos = []
+            for i in novaPopulacao: self.addIndividuo(i)
+            self.__indAvaliados = False
 
     def fazerMutacao(self):
         from random import randint
