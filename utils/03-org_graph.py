@@ -3,9 +3,12 @@
 
 from sys import argv, exit
 
-if len(argv) <> 3:
-    print "Use: %s arqEntrada arqSaida" % argv[0]
+if len(argv) <> 4:
+    print "Use: %s [1|4|8] arqEntrada arqSaida" % argv[0]
     exit(1)
 
-orig = open(argv[1]).readlines()[2:-2]
-open(argv[2],'w').writelines(orig[0::4])
+jump       = int(argv[1])
+arqEntrada = argv[2]
+arqSaida   = argv[3]
+orig = open(arqEntrada).readlines()[2:-2]
+open(arqSaida,'w').writelines(orig[0::jump])

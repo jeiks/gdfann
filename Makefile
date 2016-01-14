@@ -17,7 +17,10 @@ clean:
 	find -name '*.pyc' -delete
 
 teste_RNA:
-	cd utils && make
+	cd utils && make teste_RNA
+
+teste_RNA_with_effort:
+	cd utils && make teste_RNA_with_effort
 
 clean_teste_RNA:
 	cd utils && make clean
@@ -30,3 +33,4 @@ cleanPatterns:
 
 distclean: clean cleanPatterns clean_teste_RNA
 	rm -rf Execucao_Alg_Gen.log Resultado_Alg-Genetico.txt Redes_Geradas results_plots results_tests
+	cd utils && make clean
