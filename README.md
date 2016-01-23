@@ -1,4 +1,4 @@
-## Genetic Distributed Algorithm to Fast Artificial Neural Network
+## Distributed Genetic Algorithm to Fast Artificial Neural Network
 
 ###About
 
